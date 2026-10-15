@@ -29,7 +29,7 @@ export const team = [
     name: "Saksham Yadav",
     title: "Studio Director",
     bio: "Leads Phoenix Foundry and sets the direction for the community, the cohort, and Demo Day.",
-    photo: "team/saksham.jpg",
+    photo: "team/saksham.png",
   },
   {
     name: "Sumit Karki",
