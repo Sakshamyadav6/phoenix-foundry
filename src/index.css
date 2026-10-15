@@ -1101,3 +1101,78 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + env(safe-area-inset-top, 0p
   .founder, .founder * { animation: none !important; transition: none !important; }
   *, *::before, *::after { transition-duration: 0.01ms !important; }
 }
+
+/* ---------- Intro: the mark smashes together, then the gates open ---------- */
+.intro { position: fixed; inset: 0; z-index: 1000; }
+.intro-door {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  background: var(--paper);
+  transition: transform .95s cubic-bezier(.75, 0, .2, 1);
+  will-change: transform;
+}
+/* Each door shows its half of the same scene; opening slides each half off its own side */
+.intro-door-l { clip-path: inset(0 50% 0 0); }
+.intro-door-r { clip-path: inset(0 0 0 50%); }
+.intro.is-open .intro-door-l { transform: translateX(-50%); }
+.intro.is-open .intro-door-r { transform: translateX(50%); }
+
+.intro-stage { display: grid; justify-items: center; gap: clamp(16px, 3vh, 28px); padding: 24px; text-align: center; }
+.intro-mark { position: relative; width: min(44vw, 34vh, 240px); aspect-ratio: 608 / 747; animation: intro-smash .45s ease-out .85s both; }
+.intro-half { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.intro-half path { fill: var(--phoenix); }
+.intro-half-l { clip-path: inset(-20% 50% -20% -20%); animation: intro-fly-l .7s cubic-bezier(.55, 0, 1, .45) .15s both; }
+.intro-half-r { clip-path: inset(-20% -20% -20% 50%); animation: intro-fly-r .7s cubic-bezier(.55, 0, 1, .45) .15s both; }
+@keyframes intro-fly-l { from { transform: translateX(-75vw) rotate(-14deg); opacity: 0; } 25% { opacity: 1; } }
+@keyframes intro-fly-r { from { transform: translateX(75vw) rotate(14deg); opacity: 0; } 25% { opacity: 1; } }
+@keyframes intro-smash {
+  0% { transform: scale(1.1); }
+  18% { transform: scale(0.97) translateX(-7px); }
+  36% { transform: translateX(6px); }
+  54% { transform: translateX(-4px); }
+  72% { transform: translateX(2px); }
+  100% { transform: none; }
+}
+/* Shock ring at the moment of impact */
+.intro-ring {
+  position: absolute; left: 50%; top: 55%; width: 120%; aspect-ratio: 1;
+  translate: -50% -50%; border-radius: 50%;
+  border: 2px solid var(--heat);
+  opacity: 0; pointer-events: none;
+  animation: intro-ring .8s cubic-bezier(.2, .8, .3, 1) .85s forwards;
+}
+@keyframes intro-ring { from { opacity: 0.9; transform: scale(0.25); } to { opacity: 0; transform: scale(1.9); } }
+
+.intro-word {
+  display: flex; overflow: hidden;
+  font-family: var(--font-display); font-weight: 800; font-stretch: 74%; text-transform: uppercase;
+  font-size: clamp(2rem, 1rem + 6vw, 5rem); line-height: 1; color: var(--green);
+}
+.intro-word span { display: inline-block; animation: intro-rise .55s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(1.05s + var(--i) * 35ms); }
+@keyframes intro-rise { from { transform: translateY(105%); opacity: 0; } }
+.intro-tag {
+  font: 600 0.8rem/1.3 var(--font-display); letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+  animation: fade-in .6s ease 1.7s both;
+}
+
+/* Gold seam down the middle where the gates will part */
+.intro-seam {
+  position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px;
+  background: var(--heat); box-shadow: 0 0 12px rgba(194, 155, 95, 0.6);
+  transform: scaleY(0); transform-origin: top;
+  animation: intro-seam .5s cubic-bezier(.6, 0, .3, 1) 1.9s both;
+  transition: opacity .3s ease;
+}
+@keyframes intro-seam { to { transform: scaleY(1); } }
+.intro.is-open .intro-seam { opacity: 0; }
+
+.intro-skip {
+  position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: none; cursor: pointer;
+  font: 600 0.75rem/1 var(--font-display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+  text-decoration: underline; text-underline-offset: 4px;
+}
+.intro.is-open .intro-skip { opacity: 0; pointer-events: none; }
+
+/* Hold the hero's entrance until the gates open */
+.intro-playing .h-ch, .intro-playing .hero-in { animation-play-state: paused; }

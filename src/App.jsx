@@ -7,6 +7,7 @@ import HowToJoin from './components/HowToJoin.jsx';
 import Team from './components/Team.jsx';
 import Footer from './components/Footer.jsx';
 import Mascot from './components/Mascot.jsx';
+import Intro from './components/Intro.jsx';
 import { useAnvilSparks } from './components/shared.jsx';
 
 export default function App() {
@@ -26,6 +27,7 @@ export default function App() {
       </main>
       <Footer />
       <Mascot />
+      <Intro />
     </>
   );
 }

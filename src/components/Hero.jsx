@@ -35,7 +35,8 @@ const CURVE_PATH = CURVE.reduce((d, p, i, a) => {
 }, '');
 
 // The phoenix from the logo, in four pieces that fly up into place at the peak
-const PHOENIX = [
+export const PHOENIX_VIEWBOX = '390 428 608 747';
+export const PHOENIX = [
   {
     d: 'M400 438C440 490 560 600 745 715L780 790 826 702 785 672 835 670 758 606 922 640 972 678C984 686 989 694 988 703 ' +
       'C962 694 930 696 914 716C902 733 905 752 918 762L985 808 843 1005 697 845 512 773 456 657 662 752 440 615C425 560 410 495 400 438Z',
@@ -241,7 +242,7 @@ export default function Hero() {
             <span className="curve-pen" />
             <svg
               className="hero-mark"
-              viewBox="390 428 608 747"
+              viewBox={PHOENIX_VIEWBOX}
               style={{ left: `${PEAK[0] / 10}%`, top: `${PEAK[1]}%` }}
             >
               {PHOENIX.map((p, i) => (
