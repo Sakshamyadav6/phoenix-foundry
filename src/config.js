@@ -56,6 +56,12 @@ export const team = [
     bio: "Runs communication and outreach so every student hears about the next workshop, pitch night, and cohort.",
     photo: "https://www.iampitambar.com/profile.jpg",
   },
+   {
+    name: "Elliana Flees",
+    title: "Director of Brand and Marketing",
+    bio: "Shapes how Phoenix Foundry looks and sounds, online and on campus. They tell the stories of the founders rising through the Foundry.",
+    photo: null,
+  },
 ];
 
 export const advisor = {
