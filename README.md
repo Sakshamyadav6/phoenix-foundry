@@ -31,15 +31,15 @@ src/
   App.jsx            page sections in order
   components/
     Nav.jsx          sticky nav + mobile menu
-    Hero.jsx         headline and buttons
-    Embers.jsx       rising sparks in the hero
-    WhoWeAre.jsx     mission, name, Learn / Build / Launch
-    WhoCanJoin.jsx   three paths in
-    WhatToExpect.jsx Community vs Cohort + 5-stage timeline
-    HowToJoin.jsx    three steps + join buttons
+    Hero.jsx         horizontal hero: three chapters, growth curve, jargon, phoenix
+    WhoWeAre.jsx     statement that inks in on scroll, Learn/Build/Launch loop, the name
+    WhoCanJoin.jsx   rotating majors slot + "Where are you right now?" path finder
+    WhatToExpect.jsx Community/Cohort switch + sticky five-stage journey tracker
+    HowToJoin.jsx    launch checklist (remembered in the browser) + next-event ticket
     Team.jsx         officer cards + advisor
-    Footer.jsx
-    shared.jsx       Reveal (rise-on-scroll), links, placeholders
+    Footer.jsx       wordmark, links, live Green Bay time
+    Mascot.jsx       Uni the unicorn (tap for a tip)
+    shared.jsx       Reveal (rise-on-scroll), SectionHead, links, placeholders
 ```
 
 ## Deploy

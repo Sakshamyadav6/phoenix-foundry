@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react';
-import { Reveal, prefersReducedMotion } from './shared.jsx';
+import { useEffect, useRef, useState } from 'react';
+import { Reveal, SectionHead } from './shared.jsx';
+import Foal from './Foal.jsx';
 
 const TRACKS = [
   {
@@ -7,13 +8,14 @@ const TRACKS = [
     pill: 'Open to everyone',
     body: 'Show up, meet other builders, and learn by doing. Come to one event or all of them.',
     items: ['Founder talks', 'Hands-on workshops', 'Pitch nights', 'Idea jams'],
+    glance: [['Who', 'Every UWGB student'], ['When', 'Anytime, all year'], ['Commitment', 'One event, or all of them']],
   },
   {
     title: 'Foundry Cohort',
     pill: 'By application · each semester',
     body: 'A focused semester for teams ready to build, with real milestones and a stage at the end.',
     items: ['A small group of teams', 'Weekly sessions with milestones', 'A matched mentor', 'A final Demo Day'],
-    cohort: true,
+    glance: [['Who', 'Teams, by application'], ['When', 'Each semester'], ['Commitment', 'Weekly sessions']],
   },
 ];
 
@@ -25,111 +27,131 @@ const STEPS = [
   { title: 'Pitch at Demo Day', body: 'Present your venture to judges and investors.' },
 ];
 
-/**
- * Molten pour through the cohort stages, tied to scroll.
- * Sets --progress (0..1) and line geometry on the list, and marks each stage
- * cold (not reached), hot (metal just arrived) or cooled (already passed).
- */
-function useMoltenTimeline() {
-  const ref = useRef(null);
+// Mini growth chart for the tracker: one point per stage, flat then up
+const SPARK = [[8, 52], [58, 48], [108, 50], [158, 30], [208, 8]];
+
+function Tracks() {
+  const [t, setT] = useState(1);
+  const track = TRACKS[t];
+  const onKey = (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const next = t === 0 ? 1 : 0;
+    setT(next);
+    e.currentTarget.querySelectorAll('[role="tab"]')[next].focus();
+  };
+
+  return (
+    <Reveal className="tracks">
+      <div className="switch" role="tablist" aria-label="Two ways in" onKeyDown={onKey} style={{ '--t': t }}>
+        <span className="switch-thumb" aria-hidden="true" />
+        {TRACKS.map((tr, i) => (
+          <button
+            key={tr.title}
+            type="button"
+            role="tab"
+            id={`track-tab-${i}`}
+            aria-selected={i === t}
+            aria-controls="track-panel"
+            tabIndex={i === t ? 0 : -1}
+            onClick={() => setT(i)}
+          >
+            {tr.title}
+          </button>
+        ))}
+      </div>
+
+      <div className="track-panel" role="tabpanel" id="track-panel" aria-labelledby={`track-tab-${t}`} key={t}>
+        <div className="track-main">
+          <p className="track-pill">{track.pill}</p>
+          <h3>{track.title}</h3>
+          <p className="track-body">{track.body}</p>
+          <ul className="track-items">
+            {track.items.map((item) => (
+              <li key={item}>
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 10.5 3 3 7-7" /></svg>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <dl className="glance">
+          {track.glance.map(([k, v]) => (
+            <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
+          ))}
+        </dl>
+      </div>
+    </Reveal>
+  );
+}
+
+/** The cohort journey: stage cards scroll past a sticky tracker that follows the one in view. */
+function Journey() {
+  const [active, setActive] = useState(0);
+  const listRef = useRef(null);
 
   useEffect(() => {
-    const list = ref.current;
-    if (!list || prefersReducedMotion()) return;
-    const steps = [...list.querySelectorAll('.step')];
-    const wide = window.matchMedia('(min-width: 900px)');
-    let stops = [];
-    let raf = 0;
-
-    // Line runs from the first stage marker to the last; stops are each marker's position along it.
-    const measure = () => {
-      const box = list.getBoundingClientRect();
-      const centers = steps.map((s) => {
-        const r = s.querySelector('.step-dot').getBoundingClientRect();
-        return wide.matches ? r.left + r.width / 2 - box.left : r.top + r.height / 2 - box.top;
-      });
-      const start = centers[0];
-      const len = Math.max(1, centers[centers.length - 1] - start);
-      list.style.setProperty('--ls', `${start}px`);
-      list.style.setProperty('--ll', `${len}px`);
-      stops = centers.map((c) => (c - start) / len);
-    };
-
-    const update = () => {
-      raf = 0;
-      const vh = window.innerHeight;
-      const r = list.getBoundingClientRect();
-      // Pour starts when the timeline is 85% down the screen; on phones it follows the list's height
-      const range = vh * 0.45 + (wide.matches ? 0 : r.height * 0.6);
-      const p = Math.min(1, Math.max(0, (vh * 0.85 - r.top) / range));
-      list.style.setProperty('--progress', p.toFixed(4));
-      steps.forEach((s, i) => {
-        const t = stops[i] ?? 0;
-        const last = i === steps.length - 1;
-        const state = p < t - 0.01 ? 'cold' : p < t + 0.22 || (last && p >= 1) ? 'hot' : 'cooled';
-        if (s.dataset.state !== state) s.dataset.state = state;
-      });
-    };
-    const schedule = () => { if (!raf) raf = requestAnimationFrame(update); };
-    const onResize = () => { measure(); schedule(); };
-
-    measure();
-    update();
-    window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', onResize);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('scroll', schedule);
-      window.removeEventListener('resize', onResize);
-    };
+    const cards = [...listRef.current.querySelectorAll('.stage')];
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && setActive(cards.indexOf(e.target))),
+      { rootMargin: '-45% 0px -50% 0px' }
+    );
+    cards.forEach((c) => io.observe(c));
+    return () => io.disconnect();
   }, []);
 
-  return ref;
+  const [x, y] = SPARK[active];
+  const line = SPARK.map((p) => p.join(',')).join(' ');
+  const done = SPARK.slice(0, active + 1).map((p) => p.join(',')).join(' ');
+
+  return (
+    <div className="journey">
+      <Reveal className="journey-head">
+        <h3>The cohort journey</h3>
+        <p>From raw idea to finished venture in one semester.</p>
+      </Reveal>
+
+      <div className="journey-grid">
+        <div className="tracker" aria-hidden="true">
+          <p className="tracker-label">Stage</p>
+          <p className="tracker-num"><strong key={active}>0{active + 1}</strong><span>/05</span></p>
+          <p className="tracker-title" key={STEPS[active].title}>{STEPS[active].title}</p>
+          <svg className="tracker-chart" viewBox="0 0 216 60">
+            <polyline className="spark-ghost" points={line} />
+            <polyline className="spark-done" points={done} />
+            {SPARK.map(([px, py], i) => (
+              <circle key={i} cx={px} cy={py} r={i === active ? 5 : 3} className={i <= active ? 'on' : ''} />
+            ))}
+            <circle className="spark-halo" cx={x} cy={y} r="10" />
+          </svg>
+          <div className="tracker-bar"><span style={{ transform: `scaleX(${(active + 1) / STEPS.length})` }} /></div>
+        </div>
+
+        <ol className="stages" ref={listRef}>
+          {STEPS.map((s, i) => (
+            <li className={`stage${i === active ? ' is-active' : ''}${i < active ? ' is-done' : ''}`} key={s.title}>
+              {i === STEPS.length - 1 && <Foal id="demo-day" className="foal-stage" />}
+              <span className="stage-num">{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <h4>{s.title}</h4>
+                <p>{s.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  );
 }
 
 export default function WhatToExpect() {
-  const stepsRef = useMoltenTimeline();
-
   return (
-    <section className="section on-dark" id="what-to-expect" aria-labelledby="expect-title">
+    <section className="section canvas" id="what-to-expect" aria-labelledby="expect-title">
       <div className="wrap">
-        <Reveal className="section-head">
-          <h2 id="expect-title">Two ways in. One community.</h2>
+        <SectionHead index="03" label="What to expect" id="expect-title" title="Two ways in. One community.">
           <p>Start with open events anytime. When you're ready to build, apply to the cohort.</p>
-        </Reveal>
-
-        <div className="tracks">
-          {TRACKS.map((t, i) => (
-            <Reveal as="article" className={`track heat${t.cohort ? ' cohort' : ''}`} delay={i * 120} key={t.title}>
-              <div className="track-top">
-                <h3>{t.title}</h3>
-                <span className="pill">{t.pill}</span>
-              </div>
-              <p>{t.body}</p>
-              <ul>
-                {t.items.map((item) => <li key={item}>{item}</li>)}
-              </ul>
-            </Reveal>
-          ))}
-        </div>
-
-        <div className="journey">
-          <Reveal className="journey-head">
-            <h3>The cohort journey</h3>
-            <p>From raw idea to finished venture in one semester.</p>
-          </Reveal>
-          <ol className="steps" ref={stepsRef}>
-            {STEPS.map((s, i) => (
-              <Reveal as="li" className="step" delay={i * 90} key={s.title}>
-                <span className="step-dot" aria-hidden="true">{i + 1}</span>
-                <div className="step-body">
-                  <h4>{s.title}</h4>
-                  <p>{s.body}</p>
-                </div>
-              </Reveal>
-            ))}
-          </ol>
-        </div>
+        </SectionHead>
+        <Tracks />
+        <Journey />
       </div>
     </section>
   );

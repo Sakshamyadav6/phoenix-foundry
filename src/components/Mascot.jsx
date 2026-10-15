@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { prefersReducedMotion } from './shared.jsx';
+import { prefersReducedMotion, throwSparks } from './shared.jsx';
+import { FOALS, foundFoals } from './Foal.jsx';
 
 // What Uni says in each part of the page. Keys match section ids (hero and footer use their own keys).
 const TIPS = {
-  hero: "Hi, I'm Uni. The plan: turn this cohort into unicorns. Scroll and I'll run with you!",
+  hero: "Hi, I'm Uni. Five baby unicorns are hiding on this page. Scroll with me and see if you can find them all!",
   'who-we-are': "Learn, build, launch. That's the whole loop.",
   'who-can-join': 'Every unicorn starts as a rough idea. Or no idea yet. Curious counts.',
-  'what-to-expect': 'Watch the metal pour. Demo Day is where it all lands.',
+  'what-to-expect': 'Five stages, one semester. Demo Day is where it all lands.',
   join: 'Membership is free. No dues, ever. Even for unicorns.',
   team: 'These are the students running the Foundry. Say hi at an event!',
   footer: 'Thanks for the ride. Now go build a unicorn!',
@@ -27,6 +28,9 @@ export default function Mascot() {
   const parts = useRef({});
   const [section, setSection] = useState('hero');
   const [talking, setTalking] = useState(false);
+  const [note, setNote] = useState(null); // overrides the section tip after a foal is found
+  const [found, setFound] = useState(0);
+  const [party, setParty] = useState(false);
   const [hidden, setHidden] = useState(false);
   const hideTimer = useRef(0);
 
@@ -36,10 +40,17 @@ export default function Mascot() {
     hideTimer.current = setTimeout(() => setTalking(false), ms);
   }, []);
 
-  // Greet once the hero headline has finished pouring
+  // Greet (and mention the hidden foals) once the visitor has scrolled the hero's first chapter away,
+  // so the bubble never sits on the hero's buttons. Large screens only; elsewhere, tap Uni.
   useEffect(() => {
-    const t = setTimeout(() => say(), 2600);
-    return () => { clearTimeout(t); clearTimeout(hideTimer.current); };
+    if (!window.matchMedia('(min-width: 1200px) and (min-height: 820px)').matches) return;
+    const onScroll = () => {
+      if (window.scrollY < window.innerHeight * 0.6) return;
+      window.removeEventListener('scroll', onScroll);
+      say(6000);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => { window.removeEventListener('scroll', onScroll); clearTimeout(hideTimer.current); };
   }, [say]);
 
   // Track which section is in the middle of the screen
@@ -55,12 +66,33 @@ export default function Mascot() {
     return () => io.disconnect();
   }, []);
 
-  // Comment on each new section (the greeting covers the first one)
-  const first = useRef(true);
+  // Tips follow the section in view but only open when Uni is tapped, so they never cover the page.
+  // Moving to a new section closes any open tip.
   useEffect(() => {
-    if (first.current) { first.current = false; return; }
-    say();
-  }, [section, say]);
+    setTalking(false);
+    setNote(null);
+  }, [section]);
+
+  // Keep score of the hidden foals
+  useEffect(() => {
+    setFound(foundFoals().size);
+    const onFound = (e) => {
+      const { count, again } = e.detail;
+      setFound(count);
+      setHidden(false);
+      if (again) setNote(`Already found that one. ${count} of ${FOALS} so far.`);
+      else if (count >= FOALS) {
+        setNote(`All ${FOALS} found! You've got an eye for unicorns. Now go build a real one.`);
+        setParty(true);
+        setTimeout(() => setParty(false), 1600);
+        const r = ref.current?.getBoundingClientRect();
+        if (r) [0, 250, 500].forEach((d) => setTimeout(() => throwSparks(r.left + r.width / 2, r.top + r.height / 3, 18, 70), d));
+      } else setNote(`You found a baby unicorn! ${count} of ${FOALS}. ${FOALS - count} still hiding.`);
+      say(5200);
+    };
+    window.addEventListener('foal-found', onFound);
+    return () => window.removeEventListener('foal-found', onFound);
+  }, [say]);
 
   // Movement: position follows scroll progress; legs cycle in step with the distance travelled.
   useEffect(() => {
@@ -161,9 +193,9 @@ export default function Mascot() {
   if (hidden) return null;
 
   return (
-    <div className="founder" ref={ref}>
+    <div className={`founder${party ? ' is-party' : ''}`} ref={ref}>
       <div className={`founder-bubble${talking ? ' is-on' : ''}`}>
-        <p>{TIPS[section] || TIPS.hero}</p>
+        <p aria-live="polite">{note || TIPS[section] || TIPS.hero}</p>
         <button type="button" className="founder-hide" onClick={() => setHidden(true)}>Hide Uni</button>
       </div>
       <button
@@ -174,10 +206,12 @@ export default function Mascot() {
       >
         <UnicornSvg parts={parts} />
       </button>
+      {found > 0 && <span className="founder-count">{found}/{FOALS} found</span>}
     </div>
   );
 }
 
+/** Molten-gold unicorn silhouette, facing right, with jointed legs driven from Mascot. */
 /** Molten-gold unicorn silhouette, facing right, with jointed legs driven from Mascot. */
 function UnicornSvg({ parts }) {
   const set = (key) => (node) => { parts.current[key] = node; };

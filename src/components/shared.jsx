@@ -98,35 +98,48 @@ export function Reveal({ as: Tag = 'div', delay = 0, className = '', style, chil
   );
 }
 
-/** Pressing a primary (orange) button throws a few sparks, like a hammer on an anvil. */
+/** Throw a small burst of gold sparks from a point on screen. */
+export function throwSparks(x, y, count = 12, reach = 46) {
+  if (prefersReducedMotion() || !document.body.animate) return;
+  for (let i = 0; i < count; i++) {
+    const spark = document.createElement('span');
+    spark.className = 'spark';
+    spark.style.left = `${x}px`;
+    spark.style.top = `${y}px`;
+    document.body.appendChild(spark);
+    // Mostly upward, fanning out, then falling slightly
+    const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.3;
+    const dist = 28 + Math.random() * reach;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist + 14;
+    spark
+      .animate(
+        [
+          { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+          { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.4)`, opacity: 0 },
+        ],
+        { duration: 420 + Math.random() * 320, easing: 'cubic-bezier(.2,.7,.4,1)' }
+      )
+      .finished.then(() => spark.remove(), () => spark.remove());
+  }
+}
+
+/** Pressing a primary button throws a few sparks, like a hammer on an anvil. */
 export function useAnvilSparks() {
   useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const onDown = (e) => {
-      if (!e.target.closest('.btn-primary') || !document.body.animate) return;
-      for (let i = 0; i < 12; i++) {
-        const spark = document.createElement('span');
-        spark.className = 'spark';
-        spark.style.left = `${e.clientX}px`;
-        spark.style.top = `${e.clientY}px`;
-        document.body.appendChild(spark);
-        // Mostly upward, fanning out, then falling slightly
-        const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.3;
-        const dist = 28 + Math.random() * 46;
-        const dx = Math.cos(angle) * dist;
-        const dy = Math.sin(angle) * dist + 14;
-        spark
-          .animate(
-            [
-              { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
-              { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.4)`, opacity: 0 },
-            ],
-            { duration: 420 + Math.random() * 320, easing: 'cubic-bezier(.2,.7,.4,1)' }
-          )
-          .finished.then(() => spark.remove(), () => spark.remove());
-      }
-    };
+    const onDown = (e) => { if (e.target.closest('.btn-primary')) throwSparks(e.clientX, e.clientY); };
     document.addEventListener('pointerdown', onDown);
     return () => document.removeEventListener('pointerdown', onDown);
   }, []);
+}
+
+/** Section opener: a numbered index label, a display headline, and optional intro text. */
+export function SectionHead({ index, label, id, title, children, className = '' }) {
+  return (
+    <Reveal className={`sec-head ${className}`.trim()}>
+      <p className="sec-index"><span>{index}</span>{label}</p>
+      <h2 id={id}>{title}</h2>
+      {children && <div className="sec-intro">{children}</div>}
+    </Reveal>
+  );
 }
