@@ -8,10 +8,10 @@ export const site = {
 
   links: {
     phoenixConnect: "https://uwgb.presence.io/organization/phoenix-foundry", // [LINK] Phoenix Connect page URL
-    cohortApplication: null, // [LINK] Cohort application form URL
+    cohortApplication: "apply/", // the on-site application page (src/components/ApplyForm.jsx)
     instagram: null, // e.g. 'https://instagram.com/yourhandle'
   },
-  instagramHandle: "@phoenixfoundry", // [@HANDLE] e.g. '@phoenixfoundry'
+  instagramHandle: "@phoenixfoundrygb", // [@HANDLE] e.g. '@phoenixfoundry'
   email: "sofounder@uwgb.edu", // [EMAIL]
 
   nextEvent: {
@@ -42,21 +42,21 @@ export const team = [
     name: "Alex Ritt",
     title: "Director of Projects and Partnerships",
     bio: "Leads the Foundry's projects and builds the partnerships that open doors for student founders.",
-    photo: null,
+    photo: "team/alex.jpeg",
   },
   {
     name: "Dinesh Bajgai",
     title: "Director of Finance and Resources",
     bio: "Manages the Foundry's budget and resources so teams have what they need to build.",
-    photo: null,
+    photo: "team/dinesh.jpg",
   },
   {
     name: "Pitambar Pandey",
     title: "Director of Communication and Outreach",
     bio: "Runs communication and outreach so every student hears about the next workshop, pitch night, and cohort.",
-    photo: "https://www.iampitambar.com/profile.jpg",
+    photo: "team/pitambar.jpeg",
   },
-   {
+  {
     name: "Elliana Flees",
     title: "Director of Brand and Marketing",
     bio: "Shapes how Phoenix Foundry looks and sounds, online and on campus. They tell the stories of the founders rising through the Foundry.",

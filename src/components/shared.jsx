@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { site } from '../config.js';
+import { HOME, ROOT, asset } from '../paths.js';
 
 export const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -26,14 +27,14 @@ export function Arrow({ size }) {
 export function Logo({ onDark = false }) {
   const src = onDark ? site.logoOnDark || site.logo : site.logo;
   if (src) {
-    return <img className="logo" src={src} alt="Phoenix Foundry" width="1249" height="240" />;
+    return <img className="logo" src={asset(src)} alt="Phoenix Foundry" width="1249" height="240" />;
   }
   return <span className="logo-slot" aria-hidden="true">LOGO</span>;
 }
 
 export function Brand({ onDark = false }) {
   return (
-    <a className="brand" href="#top" aria-label="Phoenix Foundry, back to top">
+    <a className="brand" href={ROOT ? HOME : '#top'} aria-label={ROOT ? 'Phoenix Foundry home' : 'Phoenix Foundry, back to top'}>
       <Logo onDark={onDark} />
       {/* The logo image already includes the name, so only show text next to the placeholder */}
       {!site.logo && <span className="brand-name">Phoenix Foundry</span>}

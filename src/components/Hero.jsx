@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Arrow, prefersReducedMotion } from './shared.jsx';
+import { APPLY } from '../paths.js';
 
 /*
  * A horizontal hero. The section pins under the nav and vertical scrolling slides a three-chapter
@@ -275,7 +276,7 @@ export default function Hero() {
               workshops, mentors, and a semester-long cohort that ends on the Demo Day stage.
             </p>
             <div className="hero-actions hero-in" style={{ '--i': 1 }}>
-              <a className="btn btn-primary" href="#join">
+              <a className="btn btn-primary" href={APPLY}>
                 Join Phoenix Foundry <Arrow />
               </a>
               <span className="scroll-hint" aria-hidden="true">Scroll to rise <Arrow /></span>
@@ -303,7 +304,7 @@ export default function Hero() {
               ))}
             </dl>
             <div className="hero-actions">
-              <a className="btn btn-primary" href="#join">
+              <a className="btn btn-primary" href={APPLY}>
                 Join Phoenix Foundry <Arrow />
               </a>
               <a className="btn btn-ghost" href="#what-to-expect">See How It Works</a>

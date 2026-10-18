@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Arrow, Reveal, SectionHead, prefersReducedMotion } from './shared.jsx';
 import Foal from './Foal.jsx';
+import { APPLY } from '../paths.js';
 
 const MAJORS = ['Nursing', 'Art', 'Computer Science', 'Business', 'Psychology', 'Biology', 'Communication', 'Accounting', 'Undecided'];
 
@@ -120,7 +121,7 @@ export default function WhoCanJoin() {
             <ol className="finder-next">
               {path.next.map((n) => <li key={n}>{n}</li>)}
             </ol>
-            <a className="btn btn-primary" href="#join">{path.cta} <Arrow /></a>
+            <a className="btn btn-primary" href={path.key === 'idea' ? APPLY : '#join'}>{path.cta} <Arrow /></a>
           </div>
         </Reveal>
       </div>

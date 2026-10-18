@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Brand } from './shared.jsx';
+import { APPLY, ROOT } from '../paths.js';
 
+// Section links point back to the home page when shown on another page (ROOT is '' at home)
 const LINKS = [
-  { href: '#who-we-are', label: 'Who We Are' },
-  { href: '#who-can-join', label: 'Who Can Join' },
-  { href: '#what-to-expect', label: 'What to Expect' },
-  { href: '#team', label: 'Team' },
-  { href: '#join', label: 'Join' },
+  { href: `${ROOT}#who-we-are`, label: 'Who We Are' },
+  { href: `${ROOT}#who-can-join`, label: 'Who Can Join' },
+  { href: `${ROOT}#what-to-expect`, label: 'What to Expect' },
+  { href: `${ROOT}#team`, label: 'Team' },
 ];
 
-export default function Nav() {
+/** `page="apply"` marks the Apply to Cohort button as the current page. */
+export default function Nav({ page = 'home' }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState(null);
@@ -35,9 +37,9 @@ export default function Nav() {
     };
   }, []);
 
-  // Highlight the section currently in view
+  // Highlight the section currently in view (home page only)
   useEffect(() => {
-    if (!('IntersectionObserver' in window)) return;
+    if (page !== 'home' || !('IntersectionObserver' in window)) return;
     const spy = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && setActive('#' + e.target.id)),
       { rootMargin: '-45% 0px -50% 0px' }
@@ -47,40 +49,45 @@ export default function Nav() {
   }, []);
 
   return (
-    <header className={`nav${scrolled ? ' scrolled' : ''}`} id="top">
-      <div className="wrap nav-inner">
-        <Brand />
-        <nav className="nav-links" aria-label="Primary">
-          <ul>
-            {LINKS.map((l) => (
-              <li key={l.href}>
-                <a href={l.href} aria-current={active === l.href ? 'true' : undefined}>{l.label}</a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <a className="btn btn-primary nav-cta" href="#join">Join Us</a>
-        <button
-          className="menu-btn"
-          type="button"
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          onClick={() => setOpen((o) => !o)}
-        >
-          <span />
-        </button>
-      </div>
-      <div className="mobile-menu" id="mobile-menu" hidden={!open}>
-        <nav className="wrap" aria-label="Mobile" onClick={(e) => e.target.closest('a') && setOpen(false)}>
-          <ul>
-            {LINKS.map((l) => (
-              <li key={l.href}><a href={l.href}>{l.label}</a></li>
-            ))}
-          </ul>
-          <a className="btn btn-primary" href="#join">Join Us</a>
-        </nav>
-      </div>
-    </header>
+    <>
+      {/* "#top" target. Not the header itself: the header is sticky, so it always counts as on screen
+          and a link to it would never scroll. */}
+      <span id="top" className="top-anchor" />
+      <header className={`nav${scrolled ? ' scrolled' : ''}`}>
+        <div className="wrap nav-inner">
+          <Brand />
+          <nav className="nav-links" aria-label="Primary">
+            <ul>
+              {LINKS.map((l) => (
+                <li key={l.href}>
+                  <a href={l.href} aria-current={active === l.href ? 'true' : undefined}>{l.label}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <a className="btn btn-primary nav-cta" href={APPLY} aria-current={page === 'apply' ? 'page' : undefined}>Apply to Cohort</a>
+          <button
+            className="menu-btn"
+            type="button"
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            onClick={() => setOpen((o) => !o)}
+          >
+            <span />
+          </button>
+        </div>
+        <div className="mobile-menu" id="mobile-menu" hidden={!open}>
+          <nav className="wrap" aria-label="Mobile" onClick={(e) => e.target.closest('a') && setOpen(false)}>
+            <ul>
+              {LINKS.map((l) => (
+                <li key={l.href}><a href={l.href} aria-current={active === l.href ? 'page' : undefined}>{l.label}</a></li>
+              ))}
+            </ul>
+            <a className="btn btn-primary" href={APPLY} aria-current={page === 'apply' ? 'page' : undefined}>Apply to Cohort</a>
+          </nav>
+        </div>
+      </header>
+    </>
   );
 }

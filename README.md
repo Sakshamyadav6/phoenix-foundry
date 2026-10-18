@@ -25,7 +25,10 @@ Anything still missing shows on the page as a dashed `[PLACEHOLDER]` box. All of
 ## Project layout
 
 ```
+index.html           home page
+apply/index.html     /apply/ page (second Vite entry)
 src/
+  paths.js           links/images that work from both pages
   config.js          placeholders and links
   index.css          all styles (colors and fonts are tokens at the top)
   App.jsx            page sections in order
@@ -38,6 +41,9 @@ src/
     HowToJoin.jsx    launch checklist (remembered in the browser) + next-event ticket
     Team.jsx         officer cards + advisor
     Footer.jsx       wordmark, links, live Green Bay time
+    Intro.jsx        opening animation (once per session)
+    ApplyPage.jsx    /apply/ page: hero + application form
+    ApplyForm.jsx    4-step cohort application; Google Forms IDs live in CONFIG at the top
     Mascot.jsx       Uni the unicorn (tap for a tip)
     shared.jsx       Reveal (rise-on-scroll), SectionHead, links, placeholders
 ```
