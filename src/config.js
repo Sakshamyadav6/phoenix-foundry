@@ -9,7 +9,7 @@ export const site = {
   links: {
     phoenixConnect: "https://uwgb.presence.io/organization/phoenix-foundry", // [LINK] Phoenix Connect page URL
     cohortApplication: "apply/", // the on-site application page (src/components/ApplyForm.jsx)
-    instagram: null, // e.g. 'https://instagram.com/yourhandle'
+    instagram: "https://www.instagram.com/phoenixfoundrygb", // e.g. 'https://instagram.com/yourhandle'
   },
   instagramHandle: "@phoenixfoundrygb", // [@HANDLE] e.g. '@phoenixfoundry'
   email: "sofounder@uwgb.edu", // [EMAIL]
